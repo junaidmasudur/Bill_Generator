@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillCraft - Bill Generator</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">B</div>
+    <h2>BillCraft</h2>
+    <p class="side-subtitle">Invoice workspace</p>
+
+    <a href="#business">▣ &nbsp; Business Profile</a>
+    <a href="#invoice" class="active">▤ &nbsp; Create Invoice</a>
+
+    <div class="sidebar-bottom">
+        <strong>Simple billing</strong>
+        <p>Fill what you know.<br>Skip what you don't.</p>
+    </div>
+</div>
+
+<main class="main-content">
+
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">BILLING / WORKSPACE</p>
+            <h1>Create an invoice</h1>
+            <p class="muted">Prepare a professional bill in a few minutes.</p>
+        </div>
+        <button type="button" class="btn btn-light" id="resetBtn">
+            Reset invoice
+        </button>
+    </header>
+
+    <div class="notice">
+        <strong>TIP</strong>
+        <span>
+            Most fields are optional. Skip anything you don't need.
+            You can still download your PDF.
+        </span>
+    </div>
+
+    <section class="panel" id="business">
+        <div class="section-heading">
+            <div>
+                <h2>Business profile</h2>
+                <p class="muted">Save these details for your next invoice.</p>
+            </div>
+            <span class="optional">OPTIONAL</span>
+        </div>
+
+        <div class="form-grid">
+            <label>
+                Business name
+                <input id="businessName" placeholder="Your business name">
+            </label>
+
+            <label>
+                Business email
+                <input id="businessEmail" type="email"
+                       placeholder="hello@example.com">
+            </label>
+
+            <label>
+                Phone number
+                <input id="businessPhone" placeholder="Phone number">
+            </label>
+
+            <label>
+                Website
+                <input id="businessWebsite" placeholder="www.example.com">
+            </label>
+
+            <label class="wide">
+                Business address
+                <input id="businessAddress" placeholder="Business address">
+            </label>
+
+            <label>
+                Tax ID
+                <input id="businessTaxId" placeholder="Optional tax ID">
+            </label>
+        </div>
+
+        <div class="form-footer">
+            <span id="businessMessage" class="muted small">
+                Business details are saved in this browser.
+            </span>
+            <button type="button" class="btn btn-secondary"
+                    id="saveBusinessBtn">Save business info</button>
+        </div>
+    </section>
+
+    <div class="workspace" id="invoice">
+
+        <div class="form-column">
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Invoice details</h2>
+                        <p class="muted">Leave any field blank if not needed.</p>
+                    </div>
+                    <span class="optional">OPTIONAL</span>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        Invoice number
+                        <input id="invoiceNumber" placeholder="INV-001">
+                    </label>
+
+                    <label>
+                        Invoice date
+                        <input id="invoiceDate" type="date"
+                               value="{{ today }}">
+                    </label>
+
+                    <label>
+                        Due date
+                        <input id="dueDate" type="date">
+                    </label>
+
+                    <label>
+                        Status
+                        <select id="status">
+                            <option value="">Not specified</option>
+                            <option>Unpaid</option>
+                            <option>Partially paid</option>
+                            <option>Paid</option>
+                            <option>Overdue</option>
+                        </select>
+                    </label>
+
+                    <label class="wide">
+                        Currency
+                        <select id="currency">
+                            <option value="BDT (৳)">Bangladeshi Taka (৳)</option>
+                            <option value="USD ($)">US Dollar ($)</option>
+                            <option value="EUR (€)">Euro (€)</option>
+                            <option value="GBP (£)">British Pound (£)</option>
+                            <option value="INR (₹)">Indian Rupee (₹)</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Customer information</h2>
+                        <p class="muted">Optional customer details.</p>
+                    </div>
+                    <span class="optional">OPTIONAL</span>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        Customer name
+                        <input id="customerName" placeholder="Customer name">
+                    </label>
+
+                    <label>
+                        Customer email
+                        <input id="customerEmail" type="email"
+                               placeholder="customer@example.com">
+                    </label>
+
+                    <label>
+                        Customer phone
+                        <input id="customerPhone" placeholder="Phone number">
+                    </label>
+
+                    <label>
+                        Customer address
+                        <input id="customerAddress" placeholder="Address">
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Products and services</h2>
+                        <p class="muted">Empty rows are ignored automatically.</p>
+                    </div>
+                </div>
+
+                <div class="table-scroll">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>DESCRIPTION</th>
+                                <th>QTY</th>
+                                <th>PRICE</th>
+                                <th>DISCOUNT</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsBody"></tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn btn-add" id="addItemBtn">
+                    + Add item
+                </button>
+
+                <div class="form-grid">
+                    <label>
+                        Invoice discount
+                        <input id="invoiceDiscount" type="number"
+                               min="0" step="any" placeholder="0.00">
+                    </label>
+
+                    <label>
+                        Shipping / extra charge
+                        <input id="shipping" type="number"
+                               min="0" step="any" placeholder="0.00">
+                    </label>
+
+                    <label>
+                        Tax rate (%)
+                        <input id="taxRate" type="number"
+                               min="0" max="100" step="any"
+                               placeholder="e.g. 5">
+                    </label>
+
+                    <label>
+                        Amount already paid
+                        <input id="paid" type="number"
+                               min="0" step="any" placeholder="0.00">
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Payment and notes</h2>
+                        <p class="muted">Add extra information if required.</p>
+                    </div>
+                    <span class="optional">OPTIONAL</span>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        Payment method
+                        <input id="paymentMethod"
+                               placeholder="Cash, bank transfer, etc.">
+                    </label>
+
+                    <label>
+                        Payment reference
+                        <input id="paymentReference"
+                               placeholder="Transaction ID">
+                    </label>
+
+                    <label class="wide">
+                        Notes
+                        <textarea id="notes" rows="3"
+                                  placeholder="Additional message"></textarea>
+                    </label>
+
+                    <label class="wide">
+                        Terms and conditions
+                        <textarea id="terms" rows="3"
+                                  placeholder="Optional terms"></textarea>
+                    </label>
+                </div>
+            </section>
+
+            <div class="actions">
+                <button type="button" class="btn btn-light"
+                        id="clearBtn">Clear invoice</button>
+
+                <button type="button" class="btn btn-primary"
+                        id="downloadBtn">↓ Download PDF</button>
+            </div>
+
+            <p id="errorMessage" class="error"></p>
+        </div>
+
+        <aside class="preview-column">
+            <div class="preview-heading">
+                <div>
+                    <p class="eyebrow">LIVE PREVIEW</p>
+                    <h2>Your invoice</h2>
+                </div>
+                <span class="live-dot"></span>
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-brand">
+                    <div>
+                        <h3 id="previewBusiness">Your Business</h3>
+                        <p id="previewBusinessDetails">
+                            Business details appear here
+                        </p>
+                    </div>
+                    <strong>INVOICE</strong>
+                </div>
+
+                <div class="preview-meta">
+                    <span id="previewNumber">Invoice # —</span>
+                    <span id="previewDate">Date —</span>
+                </div>
+
+                <div class="preview-customer">
+                    <p class="preview-label">BILL TO</p>
+                    <strong id="previewCustomer">Customer not specified</strong>
+                    <p id="previewCustomerDetails"></p>
+                </div>
+
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewItems">
+                        <tr>
+                            <td colspan="3">No items added</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="totals">
+                    <div><span>Subtotal</span><span id="previewSubtotal">৳0.00</span></div>
+                    <div id="discountRow" class="hidden">
+                        <span>Discount</span><span id="previewDiscount"></span>
+                    </div>
+                    <div id="shippingRow" class="hidden">
+                        <span>Extra charge</span><span id="previewShipping"></span>
+                    </div>
+                    <div id="taxRow" class="hidden">
+                        <span>Tax</span><span id="previewTax"></span>
+                    </div>
+                    <div class="grand-total">
+                        <strong>Total</strong><strong id="previewTotal">৳0.00</strong>
+                    </div>
+                    <div id="paidRow" class="hidden">
+                        <span>Paid</span><span id="previewPaid"></span>
+                    </div>
+                    <div id="balanceRow" class="hidden">
+                        <span>Balance due</span><span id="previewBalance"></span>
+                    </div>
+                </div>
+
+                <div class="thanks">Thank you for your business.</div>
+            </div>
+
+            <div class="summary-card">
+                <p>Total amount</p>
+                <h2 id="summaryTotal">৳0.00</h2>
+                <div>
+                    <span>Balance due</span>
+                    <strong id="summaryBalance">৳0.00</strong>
+                </div>
+            </div>
+
+            <p class="preview-note">
+                The final PDF is generated by the server.
+            </p>
+        </aside>
+    </div>
+
+    <footer>BillCraft · Simple, flexible invoice generation</footer>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
